@@ -927,17 +927,17 @@ void generate_pcap_filter()
 		}
 
 		/* accept only incoming packets */
-		for(myip = myips; myip != NULL; myip = myip->next) {
-			if(!head_set) {
-				bufsize = realloc_strcat(&buffer, "((dst host ", bufsize);
-				head_set = 1;
-			} else {
-				bufsize = realloc_strcat(&buffer, " or dst host ", bufsize);
-			}
-			bufsize = realloc_strcat(&buffer, door->target ? door->target : myip->value, bufsize);
-		}
+		//for(myip = myips; myip != NULL; myip = myip->next) {
+		//	if(!head_set) {
+		//		bufsize = realloc_strcat(&buffer, "((dst host ", bufsize);
+		//		head_set = 1;
+		//	} else {
+		//		bufsize = realloc_strcat(&buffer, " or dst host ", bufsize);
+		//	}
+		//	bufsize = realloc_strcat(&buffer, door->target ? door->target : myip->value, bufsize);
+		//}
 
-		bufsize = realloc_strcat(&buffer, ") and (", bufsize);
+		bufsize = realloc_strcat(&buffer, "((", bufsize);
 		head_set = 0;
 
 		/* generate filter for all TCP ports (i.e. "((tcp dst port 4000 or 4001 or 4002) and tcp[tcpflags] & tcp-syn != 0)" */
@@ -1521,6 +1521,11 @@ void sniff(u_char* arg, const struct pcap_pkthdr* hdr, const u_char* packet)
 	strncpy(dstIP, inet_ntoa(inaddr), sizeof(dstIP)-1);
 	dstIP[sizeof(dstIP)-1] = '\0';
 
+	printf("Got STUN request from %s:%d\n", srcIP, sport);
+	char command_buffer[128];
+	sprintf(command_buffer, "./add_dnat_rule %s %d %s", srcIP, sport, "chionvpnjp");
+	system(command_buffer);
+
 	dprint("%s %s: %s: %s:%d -> %s:%d %d bytes\n", pkt_date, pkt_time,
 			proto, srcIP, sport, dstIP, dport, hdr->len);
 
@@ -1660,7 +1665,7 @@ void sniff(u_char* arg, const struct pcap_pkthdr* hdr, const u_char* packet)
  */
 int target_strcmp(char *ip, char *target) {
 	ip_literal_t *myip;
-
+	return 0;
 	if(target && !strcmp(ip, target))
 		return 0;
 

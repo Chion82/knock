@@ -1,0 +1,15 @@
+#!/bin/sh
+internal_ip=$1
+port=$2
+interface=$3
+IPTABLES=/usr/bin/iptables
+CONNTRACK=/usr/bin/conntrack
+
+if [[ $($IPTABLES -t nat -L PREROUTING -n -v | grep  "to:${internal_ip}:${port}" | wc -l) -eq 0 ]]; then
+	$IPTABLES -t nat -A PREROUTING -i $interface -p udp --dport $port -j DNAT --to-destination $internal_ip:$port
+	$CONNTRACK -D -p udp > /dev/null 2> /dev/null
+	echo 'Done.'
+else
+	echo 'Rule exists. ignoring.'
+fi
+
